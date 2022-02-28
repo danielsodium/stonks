@@ -11,7 +11,7 @@ let date_ob = new Date();
 
 // Get cookie from cache
 // /home/opc/stonks/
-let cookieJSON = fs.readFileSync('cookie.json');
+let cookieJSON = fs.readFileSync('/home/opc/stonks/cookie.json');
 let cookie = JSON.parse(cookieJSON);
 
 function sendMessage(message) {
