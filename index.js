@@ -25,7 +25,7 @@ checkCookie(function() {
             req(buyStocks(cookie.cookie), function(final) {
                 final = JSON.parse(final.body);
                 if (final.Success == true) {
-                    sendMessage("Bought $" + (400000000 * 0.0002).toString() + " worth of stonks");
+                    sendMessage("Bought $" + (99999999 * 0.0002).toString() + " worth of stonks");
                 }
                 else {
                     hook.send(final.ErrorMessage);
@@ -38,7 +38,7 @@ checkCookie(function() {
             req(sellStocks(cookie.cookie), function(final) {
                 final = JSON.parse(final.body);
                 if (final.Success == true) {
-                    sendMessage("Sold $" + (400000000 * 0.0002).toString() + " worth of stonks");
+                    sendMessage("Sold $" + (99999999 * 0.0002).toString() + " worth of stonks");
                 }
                 else hook.send(final.ErrorMessage);
             });
@@ -113,7 +113,7 @@ function buyStocks(_cookie) {
         formData: {
             OrderSide: 1,
             Symbol: "HCMC",
-            Quantity: 400000000,
+            Quantity: 99999999,
             OrderType: 2,
             Price: 0.0002,
             OrderExpiration: 2,
@@ -138,7 +138,7 @@ function sellStocks(_cookie) {
         formData: {
             OrderSide: 2,
             Symbol: "HCMC",
-            Quantity: 400000000,
+            Quantity: 99999999,
             OrderType: 3,
             Price: 0.0003,
             OrderExpiration: 2,
