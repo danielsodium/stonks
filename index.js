@@ -7,12 +7,16 @@ const bot = new TelegramBot(token, {polling: false});
 const { Webhook } = require('discord-webhook-node');
 const hook = new Webhook("https://discord.com/api/webhooks/947003034427347007/M1bRmXyLMn_X89F62w151bbZGbFqtHeZg1CFmlP9_C52-jz4_KXfLYHwXbqMWaINaPjt");
 
+let date_ob = new Date();
+
 // Get cookie from cache
 let cookieJSON = fs.readFileSync('/home/opc/stonks/cookie.json');
 let cookie = JSON.parse(cookieJSON);
 
 function sendMessage(message) {
-    bot.sendMessage(5170145392, message);
+    let hours = date_ob.getHours();
+    let minutes = date_ob.getMinutes();
+    bot.sendMessage(5170145392, hours+":"+minutes + " | " + message);
 }
 
 // Check if cookie in cache is expired
