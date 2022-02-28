@@ -10,13 +10,17 @@ const hook = new Webhook("https://discord.com/api/webhooks/947003034427347007/M1
 let date_ob = new Date();
 
 // Get cookie from cache
-let cookieJSON = fs.readFileSync('/home/opc/stonks/cookie.json');
+let cookieJSON = fs.readFileSync('cookie.json');
 let cookie = JSON.parse(cookieJSON);
 
 function sendMessage(message) {
+    bot.sendMessage(5170145392, message);
+}
+
+function sendDiscord(mess) {
     let hours = date_ob.getHours();
     let minutes = date_ob.getMinutes();
-    bot.sendMessage(5170145392, hours+":"+minutes + " | " + message);
+    hook.send(hours+":"+minutes + " | " + mess);
 }
 
 // Check if cookie in cache is expired
@@ -32,11 +36,11 @@ checkCookie(function() {
                     sendMessage("Bought $" + (99999999 * 0.0002).toString() + " worth of stonks");
                 }
                 else {
-                    hook.send(final.ErrorMessage);
+                    sendDiscord(final.ErrorMessage);
                 }
             });
         } 
-        else hook.send("Buy order already exists.");
+        else sendDiscord("Buy order already exists.");
         // No sell orders
         if (data[1] == 0) {
             req(sellStocks(cookie.cookie), function(final) {
@@ -44,10 +48,10 @@ checkCookie(function() {
                 if (final.Success == true) {
                     sendMessage("Sold $" + (99999999 * 0.0002).toString() + " worth of stonks");
                 }
-                else hook.send(final.ErrorMessage);
+                else sendDiscord(final.ErrorMessage);
             });
         }
-        else hook.send("Sell order already exists.");
+        else sendDiscord("Sell order already exists.");
     })
 })
 
