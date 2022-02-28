@@ -29,6 +29,31 @@ checkCookie(function() {
     // Check if any orders have been fullfilled
     checkOrders(function(data) {
         // No buy orders
+
+
+        if (data[0] == 0 && data[1] == 0) {
+            req(sellStocks(cookie.cookie), function(final) {
+                final = JSON.parse(final.body);
+                sendDiscord(final.body);
+                if (final.Success == true) {
+                    sendMessage("Sold $" + (99999999 * 0.0003).toString() + " worth of stonks");
+                }
+                else {
+                    req(buyStocks(cookie.cookie), function(final) {
+                        final = JSON.parse(final.body);
+                        if (final.Success == true) {
+                            sendMessage("Bought $" + (99999999 * 0.0002).toString() + " worth of stonks");
+                        }
+                        else {
+                            sendDiscord(final.ErrorMessage);
+                        }
+                    });
+                }
+            });
+
+
+        }
+        /*
         if (data[0] == 0) {
             req(buyStocks(cookie.cookie), function(final) {
                 final = JSON.parse(final.body);
@@ -52,7 +77,7 @@ checkCookie(function() {
                 else sendDiscord(final.ErrorMessage);
             });
         }
-        else sendDiscord("Sell order already exists.");
+        else sendDiscord("Sell order already exists.");*/
     })
 })
 
