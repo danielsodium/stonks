@@ -1,0 +1,17 @@
+{
+  "name": "stocks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord-webhook-node": "^1.1.8",
+    "follow-redirects": "^1.14.9",
+    "node-telegram-bot-api": "^0.56.0",
+    "request": "^2.88.2"
+  }
+}
