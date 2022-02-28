@@ -10,7 +10,8 @@ const hook = new Webhook("https://discord.com/api/webhooks/947003034427347007/M1
 let date_ob = new Date();
 
 // Get cookie from cache
-let cookieJSON = fs.readFileSync('/home/opc/stonks/cookie.json');
+// /home/opc/stonks/
+let cookieJSON = fs.readFileSync('cookie.json');
 let cookie = JSON.parse(cookieJSON);
 
 function sendMessage(message) {
@@ -25,15 +26,13 @@ function sendDiscord(mess) {
 
 // Check if cookie in cache is expired
 checkCookie(function() {
-
     // Check if any orders have been fullfilled
     checkOrders(function(data) {
         // No buy orders
-
-
         if (data[0] == 0 && data[1] == 0) {
             req(sellStocks(cookie.cookie), function(final) {
                 final = JSON.parse(final.body);
+                console.log(final)
                 sendDiscord(final.body);
                 if (final.Success == true) {
                     sendMessage("Sold $" + (99999999 * 0.0003).toString() + " worth of stonks");
@@ -51,8 +50,8 @@ checkCookie(function() {
                     });
                 }
             });
-
-
+        } else {
+            sendDiscord("Orders already in place");
         }
         /*
         if (data[0] == 0) {
