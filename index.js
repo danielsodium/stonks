@@ -4,7 +4,8 @@ const TelegramBot = require('node-telegram-bot-api');
 
 const token = '5292691877:AAEd4giKmOe256TLUNv8emCOyWgubyUeLxQ';
 const bot = new TelegramBot(token, {polling: false});
-
+const { Webhook } = require('discord-webhook-node');
+const hook = new Webhook("https://discord.com/api/webhooks/947003034427347007/M1bRmXyLMn_X89F62w151bbZGbFqtHeZg1CFmlP9_C52-jz4_KXfLYHwXbqMWaINaPjt");
 
 // Get cookie from cache
 let cookieJSON = fs.readFileSync('cookie.json');
@@ -26,9 +27,12 @@ checkCookie(function() {
                 if (final.Success == true) {
                     sendMessage("Bought $" + (400000000 * 0.0002).toString() + " worth of stonks");
                 }
-                else console.log(final.ErrorMessage);
+                else {
+                    hook.send(final.ErrorMessage);
+                }
             });
-        }
+        } 
+        else hook.send("Buy order already exists.");
         // No sell orders
         if (data[1] == 0) {
             req(sellStocks(cookie.cookie), function(final) {
@@ -36,9 +40,10 @@ checkCookie(function() {
                 if (final.Success == true) {
                     sendMessage("Sold $" + (400000000 * 0.0002).toString() + " worth of stonks");
                 }
-                else console.log(final.ErrorMessage);
+                else hook.send(final.ErrorMessage);
             });
         }
+        else hook.send("Sell order already exists.");
     })
 })
 
