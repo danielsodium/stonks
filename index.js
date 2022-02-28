@@ -45,8 +45,9 @@ checkCookie(function() {
         if (data[1] == 0) {
             req(sellStocks(cookie.cookie), function(final) {
                 final = JSON.parse(final.body);
+                sendDiscord(final.body);
                 if (final.Success == true) {
-                    sendMessage("Sold $" + (99999999 * 0.0002).toString() + " worth of stonks");
+                    sendMessage("Sold $" + (99999999 * 0.0003).toString() + " worth of stonks");
                 }
                 else sendDiscord(final.ErrorMessage);
             });
@@ -147,7 +148,7 @@ function sellStocks(_cookie) {
             OrderSide: 2,
             Symbol: "HCMC",
             Quantity: 99999999,
-            OrderType: 3,
+            OrderType: 2,
             Price: 0.0003,
             OrderExpiration: 2,
             charttype: "simple",
