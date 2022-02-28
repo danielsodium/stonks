@@ -39,13 +39,14 @@ checkCookie(function() {
                     sendMessage("Sold $" + (99999999 * 0.0003).toString() + " worth of stonks");
                 }
                 else {
-                    req(buyStocks(cookie.cookie), function(final) {
-                        final = JSON.parse(final.body);
-                        if (final.Success == true) {
+                    sendDiscord(final.ErrorMessage);
+                    req(buyStocks(cookie.cookie), function(newfinal) {
+                        newfinal = JSON.parse(newfinal.body);
+                        if (newfinal.Success == true) {
                             sendMessage("Bought $" + (99999999 * 0.0002).toString() + " worth of stonks");
                         }
                         else {
-                            sendDiscord(final.ErrorMessage);
+                            sendDiscord(newfinal.ErrorMessage);
                         }
                     });
                 }
@@ -157,7 +158,7 @@ function buyStocks(_cookie) {
             Currency: "USD",
             Exchange: 1,
             QuantityType: "Amount",
-            SelectedRegion: "NorthAmerica"
+            SelectedRegion: 0
         }
     };
 }
@@ -182,7 +183,7 @@ function sellStocks(_cookie) {
             Currency: "USD",
             Exchange: 1,
             QuantityType: "Amount",
-            SelectedRegion: "NorthAmerica"
+            SelectedRegion: 0
         }
     };
 }
