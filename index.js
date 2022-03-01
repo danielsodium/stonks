@@ -19,7 +19,7 @@ let cookie = JSON.parse(cookieJSON);
 
 
 
-
+/*
 switch(cookie.version) {
     case 1:
         batchOrder();
@@ -29,7 +29,11 @@ switch(cookie.version) {
         break;
     default:
         break;
-}
+}*/
+
+checkStocks(function(canSell) {
+    console.log(canSell);
+})
 
 function sendMessage(message) {
     bot.sendMessage(5170145392, message);
@@ -120,8 +124,8 @@ function checkStocks(callback) {
 
 function indivOrder() {
     checkCookie(function() {
-        recursiveBuy();
         recursiveSell();
+        recursiveBuy();
     })
 }
 
@@ -147,7 +151,8 @@ function recursiveSell() {
             return recursiveSell();
         }
         else {
-            sendMessage("No more sell stonks");
+            console.log(newfinal.ErrorMessage)
+            //sendMessage("No more sell stonks");
             return;
         }
     });
