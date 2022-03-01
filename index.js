@@ -125,39 +125,38 @@ function indivOrder() {
     
     checkCookie(function() {
         for (var i = 0; i < stockData.names.length; i++) {
-            console.log(stockData.names[i])
-            recursiveSell(stockData.names[i], stockData.sell[i]);
-            recursiveBuy(stockData.names[i], stockData.buy[i]);
+            recursiveSell(stockData.names[i], stockData.sell[i], stockData.company[i]);
+            recursiveBuy(stockData.names[i], stockData.buy[i], stockData.company[i]);
         }
     })
 }
 
-function recursiveBuy(sym, price) {
-    req(buyStocks(sym, 99999999, price), function(newfinal) {
+function recursiveBuy(sym, price,company) {
+    req(buyStocks(sym, 99999999, (price*0.0001), company), function(newfinal) {
         newfinal = JSON.parse(newfinal.body);
         amt = 99999999;
         if (newfinal.Success == true) {
             sendMessage("Bought $" + (amt * price * 0.0001).toString() + " worth of " + sym + ".");
-            return recursiveBuy();
+            return;
         }
         else {
-            sendMessage("Did not buy $" + (amt * price * 0.0001).toString() + " worth of " + sym + ".");
+            //sendMessage("Did not buy $" + (amt * price * 0.0001).toString() + " worth of " + sym + ".");
             //sendMessage("No more buy stonks");
             return;
         }
     });
 }
 
-function recursiveSell(sym, price) {
-    req(sellStocks(sym, 99999999, price), function(newfinal) {
+function recursiveSell(sym, price, company) {
+    req(sellStocks(sym, 99999999, (price*0.0001), company), function(newfinal) {
         newfinal = JSON.parse(newfinal.body);
         amt = 99999999;
         if (newfinal.Success == true) {
             sendMessage("Sold $" + (amt * price * 0.0001).toString() + " worth of " + sym + ".");
-            return recursiveSell();
+            return;
         }
         else {
-            sendMessage("Did not sell $" + (amt * price * 0.0001).toString() + " worth of " + sym + ".");
+            //sendMessage("Did not sell $" + (amt * price * 0.0001).toString() + " worth of " + sym + ".");
             //sendMessage("No more sell stonks");
             return;
         }
@@ -281,7 +280,7 @@ function login() {
       };
 }
 
-function buyStocks(sym, amt, price) {
+function buyStocks(sym, amt, bprice, company) {
     return {
         'method': 'POST',
         'url': 'https://californiasms.com/trading/placeorder',
@@ -293,10 +292,11 @@ function buyStocks(sym, amt, price) {
             Symbol: sym,
             Quantity: amt,
             OrderType: 2,
-            Price: (price*0.0001),
+            Price: bprice,
             OrderExpiration: 2,
             charttype: "simple",
             SecurityType: "Equities",
+            CompanyName: company,
             Currency: "USD",
             Exchange: 1,
             QuantityType: "Amount",
@@ -305,7 +305,7 @@ function buyStocks(sym, amt, price) {
     };
 }
 
-function sellStocks(sym, amt, price) {
+function sellStocks(sym, amt, sprice, company) {
     return {
         'method': 'POST',
         'url': 'https://californiasms.com/trading/placeorder',
@@ -317,10 +317,11 @@ function sellStocks(sym, amt, price) {
             Symbol: sym,
             Quantity: amt,
             OrderType: 2,
-            Price: (price*0.0001),
+            Price: sprice,
             OrderExpiration: 2,
             charttype: "simple",
             SecurityType: "Equities",
+            CompanyName: company,
             Currency: "USD",
             Exchange: 1,
             QuantityType: "Amount",
