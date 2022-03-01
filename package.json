@@ -11,6 +11,7 @@
   "dependencies": {
     "discord-webhook-node": "^1.1.8",
     "dotenv": "^16.0.0",
+    "express": "^4.17.3",
     "follow-redirects": "^1.14.9",
     "node-html-parser": "^5.2.0",
     "node-telegram-bot-api": "^0.56.0",
