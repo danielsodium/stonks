@@ -8,7 +8,7 @@ const { parse } = require ('node-html-parser');
 const token = '5292691877:AAEd4giKmOe256TLUNv8emCOyWgubyUeLxQ';
 const bot = new TelegramBot(token, {polling: false});
 const { Webhook } = require('discord-webhook-node');
-const hook = new Webhook("https://discord.com/api/webhooks/947003034427347007/M1bRmXyLMn_X89F62w151bbZGbFqtHeZg1CFmlP9_C52-jz4_KXfLYHwXbqMWaINaPjt");
+const hook = new Webhook(process.env.DISCORD);
 
 require('dotenv').config();
 
