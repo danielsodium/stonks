@@ -7,13 +7,8 @@ const { parse } = require ('node-html-parser');
 
 const token = '5292691877:AAEd4giKmOe256TLUNv8emCOyWgubyUeLxQ';
 const bot = new TelegramBot(token, {polling: false});
-const { Webhook } = require('discord-webhook-node');
-const hook = new Webhook(process.env.DISCORD);
 
 require('dotenv').config();
-
-
-
 
 let date_ob = new Date();
 
@@ -61,7 +56,7 @@ function batchOrder() {
                         sendMessage("Bought " + canbuy +" stocks worth $" + (canbuy * 0.0002).toString() + ".");
                     }
                     else {
-                        sendDiscord(newfinal.ErrorMessage);
+                        sendMessage(newfinal.ErrorMessage);
                     }
                 });
             } else {
@@ -76,7 +71,7 @@ function batchOrder() {
                         sendMessage("Sold " + canSell +" stocks worth $" + (canSell * 0.0002).toString() + ".");
                     }
                     else {
-                        sendDiscord(newfinal.ErrorMessage);
+                        sendMessage(newfinal.ErrorMessage);
                     }
                 });
             }
