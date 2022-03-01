@@ -7,8 +7,8 @@ const { parse } = require ('node-html-parser');
 
 const token = '5292691877:AAEd4giKmOe256TLUNv8emCOyWgubyUeLxQ';
 const bot = new TelegramBot(token, {polling: false});
-
-require('dotenv').config();
+const dotenv = require('dotenv');
+dotenv.config({ path: __dirname + '/.env' });
 
 let date_ob = new Date();
 
