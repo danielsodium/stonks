@@ -1,18 +1,40 @@
 const request = require('request');
 const fs = require('fs');
 const TelegramBot = require('node-telegram-bot-api');
+const { parse } = require ('node-html-parser');
+
+
 
 const token = '5292691877:AAEd4giKmOe256TLUNv8emCOyWgubyUeLxQ';
 const bot = new TelegramBot(token, {polling: false});
 const { Webhook } = require('discord-webhook-node');
 const hook = new Webhook("https://discord.com/api/webhooks/947003034427347007/M1bRmXyLMn_X89F62w151bbZGbFqtHeZg1CFmlP9_C52-jz4_KXfLYHwXbqMWaINaPjt");
 
+require('dotenv').config();
+
+
+
+
 let date_ob = new Date();
 
 // Get cookie from cache
 // /home/opc/stonks/
-let cookieJSON = fs.readFileSync('/home/opc/stonks/cookie.json');
+let cookieJSON = fs.readFileSync(process.env.COOKIE_PATH +'cookie.json');
 let cookie = JSON.parse(cookieJSON);
+
+
+
+
+switch(cookie.version) {
+    case 1:
+        batchOrder;
+        break;
+    case 2:
+        indivOrder();
+        break;
+    default:
+        break;
+}
 
 function sendMessage(message) {
     bot.sendMessage(5170145392, message);
@@ -24,6 +46,119 @@ function sendDiscord(mess) {
     hook.send(hours+":"+minutes + " | " + mess);
 }
 
+// VERSION 1: BATCH ORDERS DO GO THROUGH
+
+
+function batchOrder() {
+    checkCookie(function() {
+        // Check if any money left
+        checkBalance(function(balance) {
+            if (balance > 10) {
+                var canbuy = Math.floor(balance/0.0002);
+                req(buyStocks(canbuy), function(newfinal) {
+                    newfinal = JSON.parse(newfinal.body);
+                    if (newfinal.Success == true) {
+                        sendMessage("Bought " + canbuy +" stocks worth $" + (canbuy * 0.0002).toString() + ".");
+                    }
+                    else {
+                        sendDiscord(newfinal.ErrorMessage);
+                    }
+                });
+            } else {
+
+            }
+        })
+        checkStocks(function(canSell) {
+            if (canSell > 0) {
+                req(sellStocks(canSell), function(newfinal) {
+                    newfinal = JSON.parse(newfinal.body);
+                    if (newfinal.Success == true) {
+                        sendMessage("Sold " + canSell +" stocks worth $" + (canSell * 0.0002).toString() + ".");
+                    }
+                    else {
+                        sendDiscord(newfinal.ErrorMessage);
+                    }
+                });
+            }
+        })
+    })
+}
+
+function checkBalance(callback) {
+    var options = { 
+        'method': 'GET',
+        'headers': {
+            'Cookie': cookie.cookie
+        },
+        'url': 'https://californiasms.com/account/accountbalances'
+    };
+    req(options, function(res) {
+        root = parse(res.body);
+        var bal = root.querySelector('tbody tr').querySelectorAll('td');
+        callback(parseFloat(bal[1].text.replace("$","").replace(",",'')));
+    });
+}
+
+function checkStocks(callback) {
+    var options = { 
+        'method': 'GET',
+        'headers': {
+            'Cookie': cookie.cookie
+        },
+        'url': 'https://californiasms.com/portfolio/openpositionsbysecuritytype?securityType=Equities&pageIndex=0&pageSize=12&sortField=CreateDate&sortDirection=DESC'
+    };
+    req(options, function(res) {
+        var page = JSON.parse(res.body).Html;
+        root = parse(page);
+        var aquired = root.querySelectorAll("tr");
+        for (var i = 0 ; i < aquired.length; i++) {
+            if (aquired[i].innerHTML.includes("HCMC")) {
+                data = aquired[i].querySelectorAll("td")[2];
+                return callback(parseInt(data.text));
+            }
+        }
+    });
+}
+
+
+// VERSION 2: BATCH ORDERS DO NOT GO THROUGH
+
+function indivOrder() {
+    checkCookie(function() {
+        recursiveBuy();
+        recursiveSell();
+    })
+}
+
+function recursiveBuy() {
+    req(buyStocks(99999999), function(newfinal) {
+        newfinal = JSON.parse(newfinal.body);
+        if (newfinal.Success == true) {
+            sendMessage("Bought " + 99999999 +" stocks worth $" + (99999999 * 0.0002).toString() + ".");
+            return recursiveBuy();
+        }
+        else {
+            return;
+        }
+    });
+}
+
+function recursiveSell() {
+    req(sellStocks(99999999), function(newfinal) {
+        newfinal = JSON.parse(newfinal.body);
+        if (newfinal.Success == true) {
+            sendMessage("Sold " + 99999999 +" stocks worth $" + (99999999 * 0.0002).toString() + ".");
+            return recursiveSell();
+        }
+        else {
+            return;
+        }
+    });
+}
+
+
+// VERSION 3: OLD VERSION
+/*
 // Check if cookie in cache is expired
 checkCookie(function() {
     // Check if any orders have been fullfilled
@@ -53,7 +188,7 @@ checkCookie(function() {
         } else {
             sendDiscord("Orders already in place");
         }
-        /*
+        
         if (data[0] == 0) {
             req(buyStocks(cookie.cookie), function(final) {
                 final = JSON.parse(final.body);
@@ -77,9 +212,10 @@ checkCookie(function() {
                 else sendDiscord(final.ErrorMessage);
             });
         }
-        else sendDiscord("Sell order already exists.");*/
+        else sendDiscord("Sell order already exists.");
     })
 })
+*/
 
 function checkCookie(callback) {
     var date = Date.now()
@@ -137,17 +273,17 @@ function login() {
       };
 }
 
-function buyStocks(_cookie) {
+function buyStocks(amt) {
     return {
         'method': 'POST',
         'url': 'https://californiasms.com/trading/placeorder',
         'headers': {
-            'Cookie': _cookie
+            'Cookie': cookie.cookie
         },
         formData: {
             OrderSide: 1,
             Symbol: "HCMC",
-            Quantity: 99999999,
+            Quantity: amt,
             OrderType: 2,
             Price: 0.0002,
             OrderExpiration: 2,
@@ -162,17 +298,17 @@ function buyStocks(_cookie) {
     };
 }
 
-function sellStocks(_cookie) {
+function sellStocks(amt) {
     return {
         'method': 'POST',
         'url': 'https://californiasms.com/trading/placeorder',
         'headers': {
-            'Cookie': _cookie
+            'Cookie': cookie.cookie
         },
         formData: {
             OrderSide: 2,
             Symbol: "HCMC",
-            Quantity: 99999999,
+            Quantity: amt,
             OrderType: 2,
             Price: 0.0003,
             OrderExpiration: 2,
