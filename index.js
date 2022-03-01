@@ -133,6 +133,7 @@ function recursiveBuy() {
             return recursiveBuy();
         }
         else {
+            sendMessage("No more buy stonks");
             return;
         }
     });
@@ -146,6 +147,7 @@ function recursiveSell() {
             return recursiveSell();
         }
         else {
+            sendMessage("No more sell stonks");
             return;
         }
     });
