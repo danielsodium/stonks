@@ -27,7 +27,7 @@ let cookie = JSON.parse(cookieJSON);
 
 switch(cookie.version) {
     case 1:
-        batchOrder;
+        batchOrder();
         break;
     case 2:
         indivOrder();
@@ -54,7 +54,7 @@ function batchOrder() {
         // Check if any money left
         checkBalance(function(balance) {
             if (balance > 10) {
-                var canbuy = Math.floor(balance/0.0002);
+                var canbuy = Math.floor((balance-25)/0.0002);
                 req(buyStocks(canbuy), function(newfinal) {
                     newfinal = JSON.parse(newfinal.body);
                     if (newfinal.Success == true) {
@@ -94,7 +94,7 @@ function checkBalance(callback) {
     };
     req(options, function(res) {
         root = parse(res.body);
-        var bal = root.querySelector('tbody tr').querySelectorAll('td');
+        var bal = root.querySelectorAll('table')[1].querySelectorAll('tbody tr')[4].querySelectorAll('td');
         callback(parseFloat(bal[1].text.replace("$","").replace(",",'')));
     });
 }
