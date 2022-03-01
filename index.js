@@ -10,6 +10,7 @@ const bot = new TelegramBot(token, {polling: false});
 const dotenv = require('dotenv');
 dotenv.config({ path: __dirname + '/.env' });
 
+
 let date_ob = new Date();
 
 // Get cookie from cache
@@ -17,7 +18,7 @@ let date_ob = new Date();
 let cookieJSON = fs.readFileSync(process.env.COOKIE_PATH +'cookie.json');
 let cookie = JSON.parse(cookieJSON);
 
-
+stockData = JSON.parse(fs.readFileSync(process.env.COOKIE_PATH +'stocks.json'));
 
 
 switch(cookie.version) {
@@ -119,35 +120,44 @@ function checkStocks(callback) {
 
 // VERSION 2: BATCH ORDERS DO NOT GO THROUGH
 
+
 function indivOrder() {
+    
     checkCookie(function() {
-        recursiveSell();
-        recursiveBuy();
+        for (var i = 0; i < stockData.names.length; i++) {
+            console.log(stockData.names[i])
+            recursiveSell(stockData.names[i], stockData.sell[i]);
+            recursiveBuy(stockData.names[i], stockData.buy[i]);
+        }
     })
 }
 
-function recursiveBuy() {
-    req(buyStocks(99999999), function(newfinal) {
+function recursiveBuy(sym, price) {
+    req(buyStocks(sym, 99999999, price), function(newfinal) {
         newfinal = JSON.parse(newfinal.body);
+        amt = 99999999;
         if (newfinal.Success == true) {
-            sendMessage("Bought " + 99999999 +" stocks worth $" + (99999999 * 0.0002).toString() + ".");
+            sendMessage("Bought $" + (amt * price * 0.0001).toString() + " worth of " + sym + ".");
             return recursiveBuy();
         }
         else {
-            sendMessage("No more buy stonks");
+            sendMessage("Did not buy $" + (amt * price * 0.0001).toString() + " worth of " + sym + ".");
+            //sendMessage("No more buy stonks");
             return;
         }
     });
 }
 
-function recursiveSell() {
-    req(sellStocks(99999999), function(newfinal) {
+function recursiveSell(sym, price) {
+    req(sellStocks(sym, 99999999, price), function(newfinal) {
         newfinal = JSON.parse(newfinal.body);
+        amt = 99999999;
         if (newfinal.Success == true) {
-            sendMessage("Sold " + 99999999 +" stocks worth $" + (99999999 * 0.0002).toString() + ".");
+            sendMessage("Sold $" + (amt * price * 0.0001).toString() + " worth of " + sym + ".");
             return recursiveSell();
         }
         else {
+            sendMessage("Did not sell $" + (amt * price * 0.0001).toString() + " worth of " + sym + ".");
             //sendMessage("No more sell stonks");
             return;
         }
@@ -271,7 +281,7 @@ function login() {
       };
 }
 
-function buyStocks(amt) {
+function buyStocks(sym, amt, price) {
     return {
         'method': 'POST',
         'url': 'https://californiasms.com/trading/placeorder',
@@ -280,10 +290,10 @@ function buyStocks(amt) {
         },
         formData: {
             OrderSide: 1,
-            Symbol: "HCMC",
+            Symbol: sym,
             Quantity: amt,
             OrderType: 2,
-            Price: 0.0002,
+            Price: price*0.0001,
             OrderExpiration: 2,
             charttype: "simple",
             SecurityType: "Equities",
@@ -296,7 +306,7 @@ function buyStocks(amt) {
     };
 }
 
-function sellStocks(amt) {
+function sellStocks(sym, amt, price) {
     return {
         'method': 'POST',
         'url': 'https://californiasms.com/trading/placeorder',
@@ -305,10 +315,10 @@ function sellStocks(amt) {
         },
         formData: {
             OrderSide: 2,
-            Symbol: "HCMC",
+            Symbol: sym,
             Quantity: amt,
             OrderType: 2,
-            Price: 0.0003,
+            Price: price*0.0001,
             OrderExpiration: 2,
             charttype: "simple",
             SecurityType: "Equities",
