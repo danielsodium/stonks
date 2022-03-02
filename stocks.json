@@ -1,6 +1,6 @@
 {
-    "names": ["UBQU", "HCMC", "INCT", "DRNK", "FTEG", "GNCP", "BDGR"],
-    "company":["Ubiquitech+Software+Corp","Healthier+Choices+Management+Corp", "InCapta+Inc", "NoHo+Inc","For+The+Earth+Corp","GNCC+Capital+Inc","Black+Dragon+Resource+Co.+Inc."],
-    "buy": [2, 2, 1.5, 4, 1, 1, 1],
-    "sell": [2.5, 3, 2, 5, 2, 2, 2]
+    "names": ["INCT", "FTEG", "GNCP", "BDGR"],
+    "company":["InCapta+Inc","For+The+Earth+Corp","GNCC+Capital+Inc","Black+Dragon+Resource+Co.+Inc."],
+    "buy": [1, 1, 1, 1],
+    "sell": [2, 2, 2, 2]
 }
