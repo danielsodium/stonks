@@ -138,7 +138,7 @@ function recursiveCheck(i) {
         
         recursiveSell(stockData.names[i], stockData.sell[i], stockData.company[i],function (success){
             if (success) stockData.bought[i]--;
-            if (stockData.bought[i] < 2) {
+            if (stockData.bought[i] < 1) {
                 stockData.bought[i]++;
                 recursiveBuy(stockData.names[i], stockData.buy[i], stockData.company[i], function() {
                     recursiveCheck(i+1);
