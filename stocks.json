@@ -1,6 +1,1 @@
-{
-    "names": ["INCT", "FTEG", "GNCP", "BDGR"],
-    "company":["InCapta+Inc","For+The+Earth+Corp","GNCC+Capital+Inc","Black+Dragon+Resource+Co.+Inc."],
-    "buy": [1, 1, 1, 1],
-    "sell": [2, 2, 2, 2]
-}
+{"names":["INCT","FTEG","GNCP","BDGR"],"company":["InCapta+Inc","For+The+Earth+Corp","GNCC+Capital+Inc","Black+Dragon+Resource+Co.+Inc."],"buy":[0.0001,0.0001,0.0001,0.0001],"sell":[0.0002,0.0002,0.0002,0.0002],"bought":[2,2,2,2]}

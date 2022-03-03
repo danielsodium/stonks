@@ -124,64 +124,54 @@ function checkStocks(callback) {
 function indivOrder() {
     
     checkCookie(function() {
-        var order = [0,1,2,3,4,5,6];
-        shuffle(order);
-
-        recursiveCheck(order);
+        recursiveCheck(0);
     })
 }
 
-function recursiveCheck(order) {
-    if (order.length <= 0) return;
-    i = order[0];
-    
-    recursiveSell(stockData.names[i], stockData.sell[i], stockData.company[i],function (){
-        recursiveBuy(stockData.names[i], stockData.buy[i], stockData.company[i], function() {
-            recursiveCheck(order.slice(1));
+function recursiveCheck(i) {
+    if (i == stockData.names.length) {
+        fs.writeFile("stocks.json", JSON.stringify(stockData), function() {
+            return;
         })
-    });
+    }
+    else {
+        
+        recursiveSell(stockData.names[i], stockData.sell[i], stockData.company[i],function (success){
+            if (success) stockData.bought[i]--;
+            if (stockData.bought[i] < 2) {
+                stockData.bought[i]++;
+                recursiveBuy(stockData.names[i], stockData.buy[i], stockData.company[i], function() {
+                    recursiveCheck(i+1);
+                })
+            } else {
+                recursiveCheck(i+1);
+            }
+        });
+    }
 }
 
 function recursiveBuy(sym, price,company, callback) {
-    req(buyStocks(sym, 99999999, (price*0.0001), company), function(newfinal) {
+    req(buyStocks(sym, 99999999, price, company), function(newfinal) {
         newfinal = JSON.parse(newfinal.body);
         amt = 99999999;
         if (newfinal.Success == true) {
-            sendMessage("Bought $" + (amt * price * 0.0001).toString() + " worth of " + sym + ".");
+            sendMessage("Bought $" + (amt * price).toString() + " worth of " + sym + ".");
         } //else console.log(newfinal.ErrorMessage);
         callback();
     });
 }
 
 function recursiveSell(sym, price, company, callback) {
-    req(sellStocks(sym, 99999999, (price*0.0001), company), function(newfinal) {
+    req(sellStocks(sym, 99999999, (price), company), function(newfinal) {
         newfinal = JSON.parse(newfinal.body);
         amt = 99999999;
         if (newfinal.Success == true) {
-            sendMessage("Sold $" + (amt * price * 0.0001).toString() + " worth of " + sym + ".");
+            sendMessage("Sold $" + (amt * price).toString() + " worth of " + sym + ".");
         } //else console.log(newfinal.ErrorMessage);
-        callback();
+        callback(newfinal.Success);
     });
 }
 
-
-function shuffle(array) {
-    let currentIndex = array.length,  randomIndex;
-
-    // While there remain elements to shuffle...
-    while (currentIndex != 0) {
-
-        // Pick a remaining element...
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-
-        // And swap it with the current element.
-        [array[currentIndex], array[randomIndex]] = [
-        array[randomIndex], array[currentIndex]];
-    }
-
-    return array;
-}
 // VERSION 3: OLD VERSION
 /*
 // Check if cookie in cache is expired
