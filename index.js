@@ -108,12 +108,14 @@ function checkStocks(callback) {
         var page = JSON.parse(res.body).Html;
         root = parse(page);
         var aquired = root.querySelectorAll("tr");
+        callback(aquired);
+        /*
         for (var i = 0 ; i < aquired.length; i++) {
-            if (aquired[i].innerHTML.includes("HCMC")) {
-                data = aquired[i].querySelectorAll("td")[2];
-                return callback(parseInt(data.text));
+            if (aquired[i].innerHTML.includes(name)) {
+                //data = aquired[i].querySelectorAll("td")[2];
+                return callback(true);
             }
-        }
+        }*/
     });
 }
 
@@ -121,32 +123,71 @@ function checkStocks(callback) {
 // VERSION 2: BATCH ORDERS DO NOT GO THROUGH
 
 
+function getOrders(callback) {
+    var options = { 
+        'method': 'GET',
+        'headers': {
+            'Cookie': cookie.cookie
+        },
+        'url': 'https://californiasms.com/account/getorderhistory?pageIndex=0&pageSize=12&startDate=09-04-2021&endDate=06-25-2022&sortField=CreateDate&sortDirection=DESC&status=Open&_=1646373071920'
+    };
+    req(options, function(res) {
+        var page = JSON.parse(res.body).Html;
+        root = parse(page);
+        var aquired = root.querySelectorAll("td a");
+        callback(aquired);
+        //callback(aquired);
+        /*
+        for (var i = 0 ; i < aquired.length; i++) {
+            if (aquired[i].innerHTML.includes(name)) {
+                //data = aquired[i].querySelectorAll("td")[2];
+                return callback(true);
+            }
+        }*/
+    });
+}
+
 function indivOrder() {
     
     checkCookie(function() {
-        recursiveCheck(0);
+        getOrders(function(orders) {
+            recursiveCheck(orders, 0);
+        })
     })
 }
 
-function recursiveCheck(i) {
+function checkStockOrders(orders,name, callback) {
+    for (var i = 0 ; i < orders.length; i++) {
+        if (orders[i].text.includes(name)) {
+            //data = aquired[i].querySelectorAll("td")[2];
+            return callback(true);
+        }
+    }
+    return callback(false);
+}
+
+function recursiveCheck(orders, i) {
     if (i == stockData.names.length) {
         fs.writeFile("stocks.json", JSON.stringify(stockData), function() {
             return;
         })
     }
     else {
-        
-        recursiveSell(stockData.names[i], stockData.sell[i], stockData.company[i],function (success){
-            if (success) stockData.bought[i]--;
-            if (stockData.bought[i] < 1) {
-                stockData.bought[i]++;
-                recursiveBuy(stockData.names[i], stockData.buy[i], stockData.company[i], function() {
-                    recursiveCheck(i+1);
-                })
-            } else {
-                recursiveCheck(i+1);
+        checkStockOrders(orders, stockData.names[i], function(stockExists) {
+            if (stockExists) {
+                recursiveCheck(orders, i+1);
             }
-        });
+            else {
+                recursiveSell(stockData.names[i], stockData.sell[i], stockData.company[i],function (success){
+                    if (!success) {
+                        stockData.bought[i]++;
+                        recursiveBuy(stockData.names[i], stockData.buy[i], stockData.company[i], function() {
+                            recursiveCheck(orders, i+1);
+                        })
+                    } else recursiveCheck(orders, i+1);
+                }); 
+            }
+        })
     }
 }
 
@@ -311,7 +352,6 @@ function buyStocks(sym, amt, bprice, company) {
             SelectedRegion: "NorthAmerica"
         }
     };
-    console.log(options)
     return options;
 }
 
