@@ -4,12 +4,13 @@ const TelegramBot = require('node-telegram-bot-api');
 const { parse } = require ('node-html-parser');
 
 
-
 const token = '5292691877:AAEd4giKmOe256TLUNv8emCOyWgubyUeLxQ';
 const bot = new TelegramBot(token, {polling: false});
 const dotenv = require('dotenv');
 dotenv.config({ path: __dirname + '/.env' });
 
+var cash = 400000;
+var totalCost = 0;
 
 let date_ob = new Date();
 
@@ -20,7 +21,7 @@ let cookie = JSON.parse(cookieJSON);
 
 stockData = JSON.parse(fs.readFileSync(process.env.COOKIE_PATH +'stocks.json'));
 
-
+/*
 switch(cookie.version) {
     case 1:
         batchOrder();
@@ -30,8 +31,8 @@ switch(cookie.version) {
         break;
     default:
         break;
-}
-
+}*/
+indivOrder();
 
 function sendMessage(message) {
     bot.sendMessage(5170145392, message);
@@ -43,85 +44,19 @@ function sendDiscord(mess) {
     hook.send(hours+":"+minutes + " | " + mess);
 }
 
-// VERSION 1: BATCH ORDERS DO GO THROUGH
-
-
-function batchOrder() {
+// VERSION 2: BATCH ORDERS DO NOT GO THROUGH
+function indivOrder() {
+    stockData.buy.forEach(function(price) {
+        totalCost += price;
+    })
     checkCookie(function() {
-        // Check if any money left
-        checkBalance(function(balance) {
-            if (balance > 10) {
-                var canbuy = Math.floor((balance-25)/0.0002);
-                req(buyStocks(canbuy), function(newfinal) {
-                    newfinal = JSON.parse(newfinal.body);
-                    if (newfinal.Success == true) {
-                        sendMessage("Bought " + canbuy +" stocks worth $" + (canbuy * 0.0002).toString() + ".");
-                    }
-                    else {
-                        sendMessage(newfinal.ErrorMessage);
-                    }
-                });
-            } else {
-
-            }
-        })
-        checkStocks(function(canSell) {
-            if (canSell > 0) {
-                req(sellStocks(canSell), function(newfinal) {
-                    newfinal = JSON.parse(newfinal.body);
-                    if (newfinal.Success == true) {
-                        sendMessage("Sold " + canSell +" stocks worth $" + (canSell * 0.0002).toString() + ".");
-                    }
-                    else {
-                        sendMessage(newfinal.ErrorMessage);
-                    }
-                });
-            }
+        getOrders(function(orders) {
+            checkCurrentStocks(function(listed) {
+                recursiveCheck(listed, orders, 0);
+            })
         })
     })
 }
-
-function checkBalance(callback) {
-    var options = { 
-        'method': 'GET',
-        'headers': {
-            'Cookie': cookie.cookie
-        },
-        'url': 'https://californiasms.com/account/accountbalances'
-    };
-    req(options, function(res) {
-        root = parse(res.body);
-        var bal = root.querySelectorAll('table')[1].querySelectorAll('tbody tr')[4].querySelectorAll('td');
-        callback(parseFloat(bal[1].text.replace("$","").replace(",",'')));
-    });
-}
-
-function checkStocks(callback) {
-    var options = { 
-        'method': 'GET',
-        'headers': {
-            'Cookie': cookie.cookie
-        },
-        'url': 'https://californiasms.com/portfolio/openpositionsbysecuritytype?securityType=Equities&pageIndex=0&pageSize=12&sortField=CreateDate&sortDirection=DESC'
-    };
-    req(options, function(res) {
-        var page = JSON.parse(res.body).Html;
-        root = parse(page);
-        var aquired = root.querySelectorAll("tr");
-        callback(aquired);
-        /*
-        for (var i = 0 ; i < aquired.length; i++) {
-            if (aquired[i].innerHTML.includes(name)) {
-                //data = aquired[i].querySelectorAll("td")[2];
-                return callback(true);
-            }
-        }*/
-    });
-}
-
-
-// VERSION 2: BATCH ORDERS DO NOT GO THROUGH
-
 
 function getOrders(callback) {
     var options = { 
@@ -133,145 +68,130 @@ function getOrders(callback) {
     };
     req(options, function(res) {
         var page = JSON.parse(res.body).Html;
+        var parsed = [];
         root = parse(page);
-        var aquired = root.querySelectorAll("td a");
-        callback(aquired);
-        //callback(aquired);
-        /*
-        for (var i = 0 ; i < aquired.length; i++) {
-            if (aquired[i].innerHTML.includes(name)) {
-                //data = aquired[i].querySelectorAll("td")[2];
-                return callback(true);
+        entries = root.querySelectorAll("td");
+        var current = [];
+        entries.forEach(function(entry) {
+            text = entry.innerHTML
+            if (!text.includes("data") && text != '') {
+                if (text.includes("<a")) {
+                    if (current.length != 0) {
+                        parsed.push(current);
+                        current = [];
+                    }
+                    //current.push(entry.text);
+                    current.push(parse(text).text)
+                }
+                else current.push(text);
+                //console.log("ENTRY");
             }
-        }*/
+        })
+        parsed.push(current);
+        callback(parsed)
     });
 }
 
-function indivOrder() {
-    
-    checkCookie(function() {
-        getOrders(function(orders) {
-            recursiveCheck(orders, 0);
+
+function checkCurrentStocks(callback) {
+    var options = { 
+        'method': 'GET',
+        'headers': {
+            'Cookie': cookie.cookie
+        },
+        'url': 'https://californiasms.com/portfolio/openpositionsbysecuritytype?securityType=Equities&pageIndex=0&pageSize=12&sortField=CreateDate&sortDirection=DESC'
+    };
+    req(options, function(res) {
+        var page = JSON.parse(res.body).Html;
+        root = parse(page);
+        var data = root.querySelectorAll("tr td");
+        var parsed = [];
+
+        var current = [];
+        data.forEach(function(entry) {
+            if (entry.innerHTML.includes("data-tooltip")) {
+                current.push(entry.querySelector("span").text.trim())
+            }
+            else if (entry.innerHTML.includes("%")) {
+                parsed.push(current)
+                current = [];
+            }
+            else if (!entry.innerHTML.includes("<")) {
+                current.push(entry.innerHTML.trim())
+            }
+            
         })
-    })
+        callback(parsed)
+    });
 }
 
-function checkStockOrders(orders,name, callback) {
+
+function checkStockOrders(orders,name) {
     for (var i = 0 ; i < orders.length; i++) {
-        if (orders[i].text.includes(name)) {
+        if (orders[i][0] == (name)) {
             //data = aquired[i].querySelectorAll("td")[2];
-            return callback(true);
+            return (true);
         }
     }
-    return callback(false);
+    return (false);
 }
 
-function recursiveCheck(orders, i) {
+function checkStockInv(listed, name) {
+    for (var i = 0 ; i < listed.length; i++) {
+        if (listed[i][0] == name) {
+            return (listed[i][1]);
+        }
+    }
+    return (-1);
+}
+
+function recursiveCheck(listed, orders, i) {
     if (i == stockData.names.length) {
-        fs.writeFile("stocks.json", JSON.stringify(stockData), function() {
-            return;
-        })
+        // End of list
+        return;
     }
     else {
-        checkStockOrders(orders, stockData.names[i], function(stockExists) {
-            if (stockExists) {
-                recursiveCheck(orders, i+1);
-            }
-            else {
-                recursiveSell(stockData.names[i], stockData.sell[i], stockData.company[i],function (success){
-                    if (!success) {
-                        stockData.bought[i]++;
-                        recursiveBuy(stockData.names[i], stockData.buy[i], stockData.company[i], function() {
-                            recursiveCheck(orders, i+1);
-                        })
-                    } else recursiveCheck(orders, i+1);
+        stockExists = checkStockOrders(orders, stockData.names[i])
+        if (stockExists) {
+            recursiveCheck(listed, orders, i+1);
+        }
+        else {
+            var current = checkStockInv(listed);
+            if (current = -1) {
+                recursiveBuy(stockData.names[i], Math.floor(cash/totalCost), stockData.buy[i], stockData.company[i], function(res) {
+                    if (!res.Success) sendMessage("Error: " + res.ErrorMessage)
+                    recursiveCheck(listed, orders, i+1);
+                })
+            } else {
+                recursiveSell(stockData.names[i], current ,stockData.sell[i], stockData.company[i],function (res){
+                    if (!res.Success) sendMessage("Error: " + res.ErrorMessage)
+                    recursiveCheck(listed, orders, i+1);
                 }); 
             }
-        })
+        }
     }
 }
 
-function recursiveBuy(sym, price,company, callback) {
-    req(buyStocks(sym, 99999999, price, company), function(newfinal) {
+function recursiveBuy(sym, amt, price, company, callback) {
+    req(buyStocks(sym, amt, price, company), function(newfinal) {
         newfinal = JSON.parse(newfinal.body);
-        amt = 99999999;
         if (newfinal.Success == true) {
             sendMessage("Bought $" + (amt * price).toString() + " worth of " + sym + ".");
         } //else console.log(newfinal.ErrorMessage);
-        callback();
+        callback(newfinal);
     });
 }
 
-function recursiveSell(sym, price, company, callback) {
-    req(sellStocks(sym, 99999999, (price), company), function(newfinal) {
+function recursiveSell(sym, amt, price, company, callback) {
+    req(sellStocks(sym, amt, (price), company), function(newfinal) {
         newfinal = JSON.parse(newfinal.body);
-        amt = 99999999;
         if (newfinal.Success == true) {
             sendMessage("Sold $" + (amt * price).toString() + " worth of " + sym + ".");
         } //else console.log(newfinal.ErrorMessage);
-        callback(newfinal.Success);
+        callback(newfinal);
     });
 }
 
-// VERSION 3: OLD VERSION
-/*
-// Check if cookie in cache is expired
-checkCookie(function() {
-    // Check if any orders have been fullfilled
-    checkOrders(function(data) {
-        // No buy orders
-        if (data[0] == 0 && data[1] == 0) {
-            req(sellStocks(cookie.cookie), function(final) {
-                final = JSON.parse(final.body);
-                console.log(final)
-                sendDiscord(final.body);
-                if (final.Success == true) {
-                    sendMessage("Sold $" + (99999999 * 0.0003).toString() + " worth of stonks");
-                }
-                else {
-                    sendDiscord(final.ErrorMessage);
-                    req(buyStocks(cookie.cookie), function(newfinal) {
-                        newfinal = JSON.parse(newfinal.body);
-                        if (newfinal.Success == true) {
-                            sendMessage("Bought $" + (99999999 * 0.0002).toString() + " worth of stonks");
-                        }
-                        else {
-                            sendDiscord(newfinal.ErrorMessage);
-                        }
-                    });
-                }
-            });
-        } else {
-            sendDiscord("Orders already in place");
-        }
-        
-        if (data[0] == 0) {
-            req(buyStocks(cookie.cookie), function(final) {
-                final = JSON.parse(final.body);
-                if (final.Success == true) {
-                    sendMessage("Bought $" + (99999999 * 0.0002).toString() + " worth of stonks");
-                }
-                else {
-                    sendDiscord(final.ErrorMessage);
-                }
-            });
-        } 
-        else sendDiscord("Buy order already exists.");
-        // No sell orders
-        if (data[1] == 0) {
-            req(sellStocks(cookie.cookie), function(final) {
-                final = JSON.parse(final.body);
-                sendDiscord(final.body);
-                if (final.Success == true) {
-                    sendMessage("Sold $" + (99999999 * 0.0003).toString() + " worth of stonks");
-                }
-                else sendDiscord(final.ErrorMessage);
-            });
-        }
-        else sendDiscord("Sell order already exists.");
-    })
-})
-*/
 
 function checkCookie(callback) {
     var date = Date.now()
@@ -314,8 +234,7 @@ function req(options, callback) {
         callback(response);
         //console.log(response.body);
         //sconsole.log(response.headers['set-cookie']);
-      });
-      
+      }); 
 }
 
 function login() {
