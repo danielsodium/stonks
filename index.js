@@ -289,7 +289,7 @@ function login() {
 }
 
 function buyStocks(sym, amt, bprice, company) {
-    return {
+    options = {
         'method': 'POST',
         'url': 'https://californiasms.com/trading/placeorder',
         'headers': {
@@ -308,9 +308,11 @@ function buyStocks(sym, amt, bprice, company) {
             Currency: "USD",
             Exchange: 1,
             QuantityType: "Amount",
-            SelectedRegion: 0
+            SelectedRegion: "NorthAmerica"
         }
     };
+    console.log(options)
+    return options;
 }
 
 function sellStocks(sym, amt, sprice, company) {
@@ -333,7 +335,7 @@ function sellStocks(sym, amt, sprice, company) {
             Currency: "USD",
             Exchange: 1,
             QuantityType: "Amount",
-            SelectedRegion: 0
+            SelectedRegion: "NorthAmerica"
         }
     };
 }
