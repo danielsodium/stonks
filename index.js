@@ -159,7 +159,7 @@ function recursiveCheck(listed, orders, i) {
             var current = checkStockInv(listed, stockData.names[i]);
             console.log(current)
             if (current == -1) {
-                recursiveBuy(stockData.names[i], Math.floor(cash/totalCost), stockData.buy[i], stockData.company[i], function(res) {
+                recursiveBuy(stockData.names[i], /*Math.floor(cash/totalCost)*/99999999, stockData.buy[i], stockData.company[i], function(res) {
                     if (!res.Success) sendMessage("Error: " + res.ErrorMessage)
                     recursiveCheck(listed, orders, i+1);
                 })
