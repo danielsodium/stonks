@@ -9,7 +9,7 @@ const bot = new TelegramBot(token, {polling: false});
 const dotenv = require('dotenv');
 dotenv.config({ path: __dirname + '/.env' });
 
-var cash = 400000;
+var cash = 180000;
 var totalCost = 0;
 
 let date_ob = new Date();
