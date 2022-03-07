@@ -127,13 +127,16 @@ function checkCurrentStocks(callback) {
 
 
 function checkStockOrders(orders,name) {
+    amt = 0;
     for (var i = 0 ; i < orders.length; i++) {
         if (orders[i][0] == (name)) {
+            amt++;
             //data = aquired[i].querySelectorAll("td")[2];
-            return (true);
+            // return (true);
         }
     }
-    return (false);
+    return amt;
+    // return (false);
 }
 
 function checkStockInv(listed, name) {
@@ -152,7 +155,7 @@ function recursiveCheck(listed, orders, i) {
     }
     else {
         stockExists = checkStockOrders(orders, stockData.names[i])
-        if (stockExists) {
+        if (stockExists > 1) {
             recursiveCheck(listed, orders, i+1);
         }
         else {
