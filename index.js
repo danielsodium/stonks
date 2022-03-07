@@ -139,7 +139,7 @@ function checkStockOrders(orders,name) {
 function checkStockInv(listed, name) {
     for (var i = 0 ; i < listed.length; i++) {
         if (listed[i][0] == name) {
-            return (listed[i][1]);
+            return (parseInt(listed[i][1]));
         }
     }
     return (-1);
