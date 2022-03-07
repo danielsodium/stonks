@@ -26,6 +26,43 @@ function req(options, callback) {
 }
 checkStocks(function(a) {console.log(a)})
 
+function getOrders(callback) {
+    var options = { 
+        'method': 'GET',
+        'headers': {
+            'Cookie': cookie.cookie
+        },
+        'url': 'https://californiasms.com/account/getorderhistory?pageIndex=0&pageSize=12&startDate=09-04-2021&endDate=06-25-2022&sortField=CreateDate&sortDirection=DESC&status=Open&_=1646373071920'
+    };
+    req(options, function(res) {
+        var page = JSON.parse(res.body).Html;
+        var parsed = [];
+        root = parse(page);
+        entries = root.querySelectorAll("td");
+        var current = [];
+        entries.forEach(function(entry) {
+            text = entry.innerHTML
+            if (!text.includes("data") && text != '') {
+                if (text.includes("<a")) {
+                    if (current.length != 0) {
+                        parsed.push(current);
+                        current = [];
+                    }
+                    //current.push(entry.text);
+                    current.push(parse(text).text)
+                }
+                else current.push(text);
+                //console.log("ENTRY");
+            }
+        })
+        parsed.push(current);
+        callback(parsed)
+    });
+}
+
+getOrders(function(a) {
+    console.log(a)
+})
 
 function checkStocks(callback) {
     var options = { 
@@ -60,7 +97,7 @@ function checkStocks(callback) {
     });
 }
 
-fs.readFile('table.html', 'utf8', function(err, html) { console.log(parseTable(html))})
+//fs.readFile('table.html', 'utf8', function(err, html) { console.log(parseTable(html))})
 //console.log(parseTable())
 function parseTable(html) {
     var parsed = [];

@@ -127,15 +127,21 @@ function checkCurrentStocks(callback) {
 
 
 function checkStockOrders(orders,name) {
-    amt = 0;
+    buyamt = 0;
+    sellamt = 0;
     for (var i = 0 ; i < orders.length; i++) {
         if (orders[i][0] == (name)) {
-            amt++;
+            if (orders[i][2],includes("Buy")) {
+                buyamt++;
+            }
+            if (orders[i][2],includes("Sell")) {
+                sellamt++;
+            } 
             //data = aquired[i].querySelectorAll("td")[2];
             // return (true);
         }
     }
-    return amt;
+    return [buyamt, sellamt];
     // return (false);
 }
 
@@ -156,11 +162,12 @@ function recursiveCheck(listed, orders, i) {
     else {
         // Check if current orders includes the current order
         stockExists = checkStockOrders(orders, stockData.names[i])
-        // If there is more than 2 orders
-        if (stockExists > 2) {
+        // If there is more than 2 orders, stop
+        if (stockExists[0] + stockExists[1] >= 2) {
             recursiveCheck(listed, orders, i+1);
         }
         else {
+            // Check how much there is
             var current = checkStockInv(listed, stockData.names[i]);
             console.log(current)
             if (current == -1) {
@@ -168,7 +175,7 @@ function recursiveCheck(listed, orders, i) {
                     if (!res.Success) sendMessage("Error: " + res.ErrorMessage)
                     recursiveCheck(listed, orders, i+1);
                 })
-            } else {
+            } else if ((current/99999999) > stockExists[1]){
                 recursiveSell(stockData.names[i], current ,stockData.sell[i], stockData.company[i],function (res){
                     if (!res.Success) sendMessage("Error: " + res.ErrorMessage)
                     recursiveCheck(listed, orders, i+1);
