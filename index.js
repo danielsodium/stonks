@@ -156,8 +156,9 @@ function recursiveCheck(listed, orders, i) {
             recursiveCheck(listed, orders, i+1);
         }
         else {
-            var current = checkStockInv(listed);
-            if (current = -1) {
+            var current = checkStockInv(listed, stockData.names[i]);
+            console.log(current)
+            if (current == -1) {
                 recursiveBuy(stockData.names[i], Math.floor(cash/totalCost), stockData.buy[i], stockData.company[i], function(res) {
                     if (!res.Success) sendMessage("Error: " + res.ErrorMessage)
                     recursiveCheck(listed, orders, i+1);
@@ -176,7 +177,7 @@ function recursiveBuy(sym, amt, price, company, callback) {
     req(buyStocks(sym, amt, price, company), function(newfinal) {
         newfinal = JSON.parse(newfinal.body);
         if (newfinal.Success == true) {
-            sendMessage("Bought $" + (amt * price).toString() + " worth of " + sym + ".");
+            sendMessage("Put in Buy order of $" + (amt * price).toString() + " worth of " + sym + ".");
         } //else console.log(newfinal.ErrorMessage);
         callback(newfinal);
     });
@@ -186,7 +187,7 @@ function recursiveSell(sym, amt, price, company, callback) {
     req(sellStocks(sym, amt, (price), company), function(newfinal) {
         newfinal = JSON.parse(newfinal.body);
         if (newfinal.Success == true) {
-            sendMessage("Sold $" + (amt * price).toString() + " worth of " + sym + ".");
+            sendMessage("Put in sell order of $" + (amt * price).toString() + " worth of " + sym + ".");
         } //else console.log(newfinal.ErrorMessage);
         callback(newfinal);
     });
