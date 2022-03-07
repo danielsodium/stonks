@@ -154,8 +154,10 @@ function recursiveCheck(listed, orders, i) {
         return;
     }
     else {
+        // Check if current orders includes the current order
         stockExists = checkStockOrders(orders, stockData.names[i])
-        if (stockExists > 1) {
+        // If there is more than 2 orders
+        if (stockExists > 2) {
             recursiveCheck(listed, orders, i+1);
         }
         else {
