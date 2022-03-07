@@ -4,20 +4,23 @@
         "FTEG",
         "GNCP",
         "BDGR",
-        "HCMC"
+        "HCMC",
+        "UBQU"
     ],
     "company": [
         "InCapta+Inc",
         "For+The+Earth+Corp",
         "GNCC+Capital+Inc",
         "Black+Dragon+Resource+Co.+Inc.",
-        "Healthier+Choices+Management+Corp"
+        "Healthier+Choices+Management+Corp",
+        "Ubiquitech+Software+Corp"
     ],
     "buy": [
         0.0001,
         0.0001,
         0.0001,
         0.0001,
+        0.0002,
         0.0002
     ],
     "sell": [
@@ -25,6 +28,7 @@
         0.0002,
         0.0002,
         0.0002,
+        0.0003,
         0.0003
     ]
 }
