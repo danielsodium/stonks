@@ -131,10 +131,10 @@ function checkStockOrders(orders,name) {
     sellamt = 0;
     for (var i = 0 ; i < orders.length; i++) {
         if (orders[i][0] == (name)) {
-            if (orders[i][2],includes("Buy")) {
+            if (orders[i][2].includes("Buy")) {
                 buyamt++;
             }
-            if (orders[i][2],includes("Sell")) {
+            if (orders[i][2].includes("Sell")) {
                 sellamt++;
             } 
             //data = aquired[i].querySelectorAll("td")[2];
