@@ -176,7 +176,7 @@ function recursiveCheck(listed, orders, i) {
                     recursiveCheck(listed, orders, i+1);
                 })
             } else if ((current/99999999) > stockExists[1]){
-                recursiveSell(stockData.names[i], current ,stockData.sell[i], stockData.company[i],function (res){
+                recursiveSell(stockData.names[i], 99999999 ,stockData.sell[i], stockData.company[i],function (res){
                     if (!res.Success) sendMessage("Error: " + res.ErrorMessage)
                     recursiveCheck(listed, orders, i+1);
                 }); 
